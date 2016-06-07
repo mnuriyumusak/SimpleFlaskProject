@@ -1,81 +1,53 @@
-from flask import Flask, jsonify,request
-import json,sqlite3
-
-
+from flask import Flask,request
+import postAdapter
 app = Flask(__name__)
 
 
-def create_database():
-    db = sqlite3.connect('database.db')
-    db.execute('CREATE TABLE students (name TEXT, addr TEXT, city TEXT, pin TEXT)')
-    db.close()
-    return "database created"
-
-def addStudent(n,a,c,p):
-    msg = ""
-    if request.method == 'POST':
-      try:
-         with sqlite3.connect("database.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO students (name,addr,city,pin)VALUES (?,?,?,?)",(n,a,c,p) )
-            con.commit()
-            msg = "Record successfully added"
-      except:
-         con.rollback()
-         msg = "error in insert operation"
-
-      finally:
-         return msg
-         con.close()
+@app.route('/post', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def post():
+    if request.method == 'GET':
+        return postAdapter.show_database()
+    elif request.method == 'POST':
+        n = request.args.get('n')
+        a = request.args.get('a')
+        c = request.args.get('c')
+        p = request.args.get('p')
+        postAdapter.add_student(n, a, c, p);
+        return "Added!"
+    elif request.method == 'PUT':
+        n = request.args.get('n')
+        a = request.args.get('a')
+        c = request.args.get('c')
+        p = request.args.get('p')
+        postAdapter.update(n, a, c, p);
+        return "Changed!"
+    elif request.method == 'DELETE':
+        n = request.args.get('n')
+        postAdapter.delete_row(n);
+        return "Deleted!"
     else:
-        return "not post"
-
-def dict_factory(cursor, row):
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-def showDatabase():
-   con = sqlite3.connect("database.db")
-   con.row_factory = dict_factory
-
-   cur = con.cursor()
-   cur.execute("select * from students")
-
-   rows = cur.fetchall();
-   return jsonify(rows)
-   con.close()
-
-def deleteRow(name):
-    con = sqlite3.connect("database.db")
-    cur = con.cursor()
-    cur.execute("delete from students where name='%s';" % (name))
-    con.commit()
-    cur.close()
+        return "Undefined method!"
 
 
-@app.route('/create')
-def create():
-    return create_database();
+@app.route('/post/<string:id>', methods=['GET','POST','PUT','DELETE'])
+def post_with_id(id):
+    if request.method == 'GET':
+        return postAdapter.show_this_row(id)
+    elif request.method == 'PUT':
+        n = request.args.get('n')
+        a = request.args.get('a')
+        c = request.args.get('c')
+        p = request.args.get('p')
+        postAdapter.update_this(id,n, a, c, p);
+        return "Changed!"
+    elif request.method == 'DELETE':
+        n = request.args.get('n')
+        postAdapter.delete_row_this(id);
+        return "Deleted!"
+    else:
+        return "Undefined method!"
 
-@app.route('/add' , methods=['GET','POST'])
-def add():
-    n = request.args.get('n')
-    a = request.args.get('a')
-    c = request.args.get('c')
-    p = request.args.get('p')
-    return addStudent(n,a,c,p);
-
-@app.route('/show' , methods=['GET'])
-def show():
-    return showDatabase()
-
-@app.route('/del' , methods=['GET','POST'])
-def dele():
-    n = request.args.get('n')
-    deleteRow(n)
-    return "a"
 
 if __name__ == "__main__":
     app.run();
+
