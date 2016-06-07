@@ -1,5 +1,6 @@
-from flask import jsonify,request
+from flask import jsonify, request
 import sqlite3
+
 
 def create_database():
     db = sqlite3.connect('database.db')
@@ -11,49 +12,49 @@ def create_database():
 def add_student(n, a, c, p):
     msg = ""
     if request.method == 'POST':
-      try:
-         with sqlite3.connect("database.db") as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO students (name,addr,city,pin)VALUES (?,?,?,?)",(n,a,c,p) )
-            con.commit()
-            msg = "Record successfully added"
-      except:
-         con.rollback()
-         msg = "error in insert operation"
-
-      finally:
-         return msg
-         con.close()
+        try:
+            with sqlite3.connect("database.db") as con:
+                cur = con.cursor()
+                cur.execute("INSERT INTO students (name,addr,city,pin)VALUES (?,?,?,?)", (n, a, c, p))
+                con.commit()
+                msg = "Record successfully added"
+        except:
+            con.rollback()
+            msg = "error in insert operation"
+        finally:
+            return msg
+            con.close()
     else:
         return "not post"
 
 
-def update(n,a,c,p):
+def update(n, a, c, p):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
-    if(n is not None):
-        cur.execute("update students set name = '%s' where name = '%s'" % (n,n))
-    if(a is not None):
-        cur.execute("update students set addr = '%s' where name = '%s'" % (a,n))
-    if(c is not None):
-        cur.execute("update students set city = '%s' where name = '%s'" % (c,n))
-    if(p is not None):
-        cur.execute("update students set pin = '%s' where name = '%s'" % (p,n))
+    if n is not None:
+        cur.execute("update students set name = '%s' where name = '%s'" % (n, n))
+    if a is not None:
+        cur.execute("update students set addr = '%s' where name = '%s'" % (a, n))
+    if c is not None:
+        cur.execute("update students set city = '%s' where name = '%s'" % (c, n))
+    if p is not None:
+        cur.execute("update students set pin = '%s' where name = '%s'" % (p, n))
 
     con.commit()
     cur.close()
 
-def update_this(name,n,a,c,p):
+
+def update_this(name, n, a, c, p):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
-    if(n is not None):
-        cur.execute("update students set name = '%s' where name = '%s';" % (n,name))
-    if(a is not None):
-        cur.execute("update students set addr = '%s' where name = '%s';" % (a,name))
-    if(c is not None):
-        cur.execute("update students set city = '%s' where name = '%s';" % (c,name))
-    if(p is not None):
-        cur.execute("update students set pin = '%s' where name = '%s';" % (p,name))
+    if n is not None:
+        cur.execute("update students set name = '%s' where name = '%s';" % (n, name))
+    if a is not None:
+        cur.execute("update students set addr = '%s' where name = '%s';" % (a, name))
+    if c is not None:
+        cur.execute("update students set city = '%s' where name = '%s';" % (c, name))
+    if p is not None:
+        cur.execute("update students set pin = '%s' where name = '%s';" % (p, name))
 
     con.commit()
     cur.close()
@@ -67,15 +68,15 @@ def dict_factory(cursor, row):
 
 
 def show_database():
-   con = sqlite3.connect("database.db")
-   con.row_factory = dict_factory
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
 
-   cur = con.cursor()
-   cur.execute("select * from students")
+    cur = con.cursor()
+    cur.execute("select * from students")
 
-   rows = cur.fetchall();
-   return jsonify(rows)
-   con.close()
+    rows = cur.fetchall()
+    return jsonify(rows)
+    con.close()
 
 
 def show_this_row(name):
@@ -85,9 +86,9 @@ def show_this_row(name):
     cur = con.cursor()
     cur.execute("select * from students")
 
-    rows = cur.fetchall();
+    rows = cur.fetchall()
     for i in range(len(rows)):
-        if(rows[i]["name"] == name):
+        if rows[i]["name"] == name:
             return jsonify(rows[i])
     con.close()
 
@@ -95,13 +96,14 @@ def show_this_row(name):
 def delete_row(name):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
-    cur.execute("delete from students where name='%s';" % (name))
+    cur.execute("delete from students where name='%s';" % name)
     con.commit()
     cur.close()
+
 
 def delete_row_this(name):
     con = sqlite3.connect("database.db")
     cur = con.cursor()
-    cur.execute("delete from students where name='%s';" % (name))
+    cur.execute("delete from students where name='%s';" % name)
     con.commit()
     cur.close()
